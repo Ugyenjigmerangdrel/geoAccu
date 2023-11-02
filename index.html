@@ -1,58 +1,64 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Geolocation API Example</title>
+    <title>Geolocation Smoothing Example</title>
   </head>
   <body>
-    <h1>High Accuracy Geolocation</h1>
-    <p>Click the button to get your current location:</p>
-    <button onclick="getLocation()">Get Location</button>
-    <p>Your current location:</p>
-    <p id="location"></p>
+    <h1>Geolocation Smoothing</h1>
+    <p>Click the button to start getting your current location:</p>
+    <button onclick="startTracking()">Start Tracking</button>
+    <p>Smoothed location:</p>
+    <p id="smoothedLocation"></p>
 
     <script>
-      function getLocation() {
+      let coordinateBuffer = []; // Buffer to store recent coordinates
+      const bufferSize = 5; // Adjust the buffer size as needed
+      let smoothedLocation = document.getElementById("smoothedLocation");
+
+      function startTracking() {
         if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(showPosition, showError, {
-            enableHighAccuracy: true, // Request high accuracy
-            timeout: 10000, // Maximum time to wait for a location in milliseconds
-            maximumAge: 0, // Maximum age of a cached location in milliseconds
-          });
+          navigator.geolocation.watchPosition(updatePosition, showError);
         } else {
-          document.getElementById("location").textContent =
+          smoothedLocation.textContent =
             "Geolocation is not supported in your browser.";
         }
       }
 
-      function showPosition(position) {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
+      function updatePosition(position) {
+        // Add the new coordinates to the buffer
+        coordinateBuffer.push(position.coords);
 
-        document.getElementById(
-          "location"
-        ).textContent = `Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`;
+        // Maintain the buffer size
+        if (coordinateBuffer.length > bufferSize) {
+          coordinateBuffer.shift(); // Remove the oldest coordinate
+        }
+
+        // Calculate the average of the coordinates in the buffer
+        const averageCoords = calculateAverageCoordinates(coordinateBuffer);
+
+        smoothedLocation.textContent = `Smoothed Latitude: ${averageCoords.latitude}, Longitude: ${averageCoords.longitude}`;
+      }
+
+      function calculateAverageCoordinates(coordsArray) {
+        const totalLat = coordsArray.reduce(
+          (acc, coord) => acc + coord.latitude,
+          0
+        );
+        const totalLng = coordsArray.reduce(
+          (acc, coord) => acc + coord.longitude,
+          0
+        );
+        const averageLat = totalLat / coordsArray.length;
+        const averageLng = totalLng / coordsArray.length;
+
+        return {
+          latitude: averageLat,
+          longitude: averageLng,
+        };
       }
 
       function showError(error) {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            document.getElementById("location").textContent =
-              "User denied the request for geolocation.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            document.getElementById("location").textContent =
-              "Location information is unavailable.";
-            break;
-          case error.TIMEOUT:
-            document.getElementById("location").textContent =
-              "The request to get user location timed out.";
-            break;
-          case error.UNKNOWN_ERROR:
-            document.getElementById("location").textContent =
-              "An unknown error occurred.";
-            break;
-        }
+        smoothedLocation.textContent = "Error: " + error.message;
       }
     </script>
   </body>
