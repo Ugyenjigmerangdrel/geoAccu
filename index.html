@@ -5,7 +5,9 @@
   </head>
   <body>
     <h1>Geolocation Smoothing</h1>
-    <p>Click the button to start getting your current location:</p>
+    <p>
+      Click the button to start getting your current location every 3 seconds:
+    </p>
     <button onclick="startTracking()">Start Tracking</button>
     <p>Smoothed location:</p>
     <p id="smoothedLocation"></p>
@@ -17,7 +19,10 @@
 
       function startTracking() {
         if ("geolocation" in navigator) {
-          navigator.geolocation.watchPosition(updatePosition, showError);
+          navigator.geolocation.getCurrentPosition(updatePosition, showError);
+          setInterval(() => {
+            navigator.geolocation.getCurrentPosition(updatePosition, showError);
+          }, 3000); // Get location data every 3 seconds
         } else {
           smoothedLocation.textContent =
             "Geolocation is not supported in your browser.";
