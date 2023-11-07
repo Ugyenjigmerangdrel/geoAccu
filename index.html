@@ -7,27 +7,72 @@
   <body>
     <h1>Real-Time Location Tracking</h1>
     <p id="locationInfo">Location: <span id="location"></span></p>
+    <button id="startButton">Start Tracking</button>
+    <button id="stopButton" disabled>Stop Tracking</button>
+    <ul id="locationList"></ul>
 
     <script>
-      // Function to get and update the user's location
+      let tracking = false;
+      let locations = [];
+
+      const locationElement = document.getElementById("location");
+      const locationList = document.getElementById("locationList");
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+
+      // Function to update the user's location
       function updateLocation() {
         if ("geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(function (position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-            var locationInfo = "Latitude: " + latitude + ", Longitude: " + longitude;
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const locationInfo =
+              "Latitude: " + latitude + ", Longitude: " + longitude;
 
             // Update the location on the display
-            document.getElementById("location").textContent = locationInfo;
+            locationElement.textContent = locationInfo;
+
+            if (tracking) {
+              // If tracking is enabled, add the location to the locations array
+              locations.push({ latitude, longitude });
+            }
           });
         } else {
-          document.getElementById("locationInfo").textContent =
+          locationElement.textContent =
             "Geolocation is not supported by your browser.";
         }
       }
 
-      // Update the location every 3 seconds
-      setInterval(updateLocation, 3000);
+      startButton.addEventListener("click", function () {
+        tracking = true;
+        locations = []; // Clear the previous locations
+        startButton.disabled = true;
+        stopButton.disabled = false;
+
+        // Start tracking by calling updateLocation every 3 seconds
+        setInterval(updateLocation, 3000);
+      });
+
+      stopButton.addEventListener("click", function () {
+        tracking = false;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+
+        // Display the array of location coordinates on the screen
+        displayLocations(locations);
+      });
+
+      function displayLocations(locations) {
+        locationList.innerHTML = ""; // Clear the list
+
+        locations.forEach(function (location, index) {
+          const listItem = document.createElement("li");
+          listItem.textContent = `Location ${index + 1}: Latitude: ${
+            location.latitude
+          }, Longitude: ${location.longitude}`;
+          locationList.appendChild(listItem);
+        });
+      }
     </script>
   </body>
 </html>
