@@ -1,0 +1,4 @@
+const marker = new google.maps.Marker({ position: { lat: location.latitude, lng:
+location.longitude }, map: map, title: location.name, });
+
+<script src="https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js"></script>

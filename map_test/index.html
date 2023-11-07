@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Geofencing with Leaflet.js</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <div id="map" style="height: 80vh"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js"></script>
+    <script>
+      // Initialize Leaflet map
+      var map = L.map("map").setView([27.9610187, 76.3998457], 15);
+
+      // Add a tile layer (you can choose your preferred provider)
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Define a geofence circle
+      var fenceCenter = L.latLng(27.96082, 76.401859);
+      var fenceRadius = 50; // Specify the radius in meters
+
+      var geofence = L.circle(fenceCenter, {
+        color: "red",
+        fillColor: "red",
+        fillOpacity: 0.2,
+        radius: fenceRadius,
+      }).addTo(map);
+
+      // Specific coordinates to track
+      var trackedCoordinates = [
+        [27.96094, 76.401803],
+        [27.96124, 76.401713],
+        [27.961608, 76.401545],
+        [27.961917, 76.401527],
+        [27.962259, 76.401649],
+        [27.962538, 76.401909],
+        [27.962685, 76.402161],
+        [27.962823, 76.402555],
+        [27.962996, 76.403068],
+        [27.9629, 76.402788],
+        [27.962727, 76.402279],
+        [27.962575, 76.401969],
+        [27.962105, 76.401576],
+        [27.961498, 76.40158],
+        [27.960814, 76.401848],
+        [27.960786, 76.401767],
+      ];
+
+      // Initialize marker for simulated location
+      var trackedLocationMarker = L.marker(trackedCoordinates[0]).addTo(map);
+
+      // Simulate tracking of the coordinates
+      var currentIndex = 0;
+
+      function simulateTracking() {
+        trackedLocationMarker.setLatLng(trackedCoordinates[currentIndex]);
+
+        // Check if the tracked location is within the geofence
+        var isInsideGeofence = geofence
+          .getBounds()
+          .contains(trackedCoordinates[currentIndex]);
+
+        if (isInsideGeofence) {
+          console.log("Tracked location is inside the geofenced area.");
+        } else {
+          console.log("Tracked location is outside the geofenced area.");
+        }
+
+        currentIndex++;
+
+        if (currentIndex < trackedCoordinates.length) {
+          // Continue tracking until all coordinates are processed
+          setTimeout(simulateTracking, 1000); // Simulate every 1 second
+        }
+      }
+
+      // Start simulating tracking
+      simulateTracking();
+    </script>
+  </body>
+</html>
