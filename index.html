@@ -1,70 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Geolocation Smoothing Example</title>
+    <meta charset="UTF-8" />
+    <title>Real-Time Location Tracking</title>
   </head>
   <body>
-    <h1>Geolocation Smoothing</h1>
-    <p>
-      Click the button to start getting your current location every 3 seconds:
-    </p>
-    <button onclick="startTracking()">Start Tracking</button>
-    <p>Smoothed location:</p>
-    <p id="smoothedLocation"></p>
+    <h1>Real-Time Location Tracking</h1>
+    <p id="locationInfo">Location: <span id="location"></span></p>
 
     <script>
-      let coordinateBuffer = []; // Buffer to store recent coordinates
-      const bufferSize = 5; // Adjust the buffer size as needed
-      let smoothedLocation = document.getElementById("smoothedLocation");
-
-      function startTracking() {
+      // Function to get and update the user's location
+      function updateLocation() {
         if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(updatePosition, showError);
-          setInterval(() => {
-            navigator.geolocation.getCurrentPosition(updatePosition, showError);
-          }, 3000); // Get location data every 3 seconds
+          navigator.geolocation.getCurrentPosition(function (position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            var locationInfo = "Latitude: " + latitude + ", Longitude: " + longitude;
+
+            // Update the location on the display
+            document.getElementById("location").textContent = locationInfo;
+          });
         } else {
-          smoothedLocation.textContent =
-            "Geolocation is not supported in your browser.";
+          document.getElementById("locationInfo").textContent =
+            "Geolocation is not supported by your browser.";
         }
       }
 
-      function updatePosition(position) {
-        // Add the new coordinates to the buffer
-        coordinateBuffer.push(position.coords);
-
-        // Maintain the buffer size
-        if (coordinateBuffer.length > bufferSize) {
-          coordinateBuffer.shift(); // Remove the oldest coordinate
-        }
-
-        // Calculate the average of the coordinates in the buffer
-        const averageCoords = calculateAverageCoordinates(coordinateBuffer);
-
-        smoothedLocation.textContent = `Smoothed Latitude: ${averageCoords.latitude}, Longitude: ${averageCoords.longitude}`;
-      }
-
-      function calculateAverageCoordinates(coordsArray) {
-        const totalLat = coordsArray.reduce(
-          (acc, coord) => acc + coord.latitude,
-          0
-        );
-        const totalLng = coordsArray.reduce(
-          (acc, coord) => acc + coord.longitude,
-          0
-        );
-        const averageLat = totalLat / coordsArray.length;
-        const averageLng = totalLng / coordsArray.length;
-
-        return {
-          latitude: averageLat,
-          longitude: averageLng,
-        };
-      }
-
-      function showError(error) {
-        smoothedLocation.textContent = "Error: " + error.message;
-      }
+      // Update the location every 3 seconds
+      setInterval(updateLocation, 3000);
     </script>
   </body>
 </html>
