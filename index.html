@@ -20,14 +20,13 @@
       const startButton = document.getElementById("startButton");
       const stopButton = document.getElementById("stopButton");
 
-      // Function to update the user's location
+      // Function to get and update the user's location
       function updateLocation() {
         if ("geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(function (position) {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
-            const locationInfo =
-              "Latitude: " + latitude + ", Longitude: " + longitude;
+            const locationInfo = "Latitude: " + latitude + ", Longitude: " + longitude;
 
             // Update the location on the display
             locationElement.textContent = locationInfo;
@@ -38,8 +37,7 @@
             }
           });
         } else {
-          locationElement.textContent =
-            "Geolocation is not supported by your browser.";
+          locationElement.textContent = "Geolocation is not supported by your browser.";
         }
       }
 
@@ -67,9 +65,7 @@
 
         locations.forEach(function (location, index) {
           const listItem = document.createElement("li");
-          listItem.textContent = `Location ${index + 1}: Latitude: ${
-            location.latitude
-          }, Longitude: ${location.longitude}`;
+          listItem.textContent = `Location ${index + 1}: Latitude: ${location.latitude}, Longitude: ${location.longitude}`;
           locationList.appendChild(listItem);
         });
       }
