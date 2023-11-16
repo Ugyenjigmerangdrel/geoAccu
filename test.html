@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Geofencing with Leaflet.js</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.umd.js"></script>
+    <link
+      href="https://cdn.maptiler.com/maptiler-sdk-js/v1.1.1/maptiler-sdk.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.maptiler.com/leaflet-maptilersdk/v1.0.0/leaflet-maptilersdk.js"></script>
+    <style>
+      #map {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" style="height: 500px"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-firestore.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCm61ep8edTmcNh3W43EBENa8f-jf8Mkic",
+        authDomain: "synergy-6bab1.firebaseapp.com",
+        databaseURL: "https://synergy-6bab1-default-rtdb.firebaseio.com",
+        projectId: "synergy-6bab1",
+        storageBucket: "synergy-6bab1.appspot.com",
+        messagingSenderId: "82792438228",
+        appId: "1:82792438228:web:652f318c42912c33e61e41",
+        measurementId: "G-SYMJ0Z520Z",
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Initialize Firestore
+      var db = firebase.firestore();
+
+      // Initialize Leaflet map
+      const key = "WvNecoJIAoXm7HIdbiDd";
+      const map = L.map("map").setView([27.9610187, 76.3998457], 19);
+      const mtLayer = L.maptilerLayer({
+        apiKey: key,
+      }).addTo(map);
+
+      // Define a geofence circle
+      var fenceCenter = L.latLng(27.96082, 76.401859);
+      var fenceRadius = 50; // Specify the radius in meters
+
+      var geofence = L.circle(fenceCenter, {
+        color: "red",
+        fillColor: "red",
+        fillOpacity: 0.2,
+        radius: fenceRadius,
+      }).addTo(map);
+
+      setInterval(() => {
+        getGPSData();
+      }, 2000);
+
+      function getGPSData() {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+
+            db.collection("trackedCoordinates").add({
+              latitude: latitude,
+              longitude: longitude,
+              timestamp: new Date().getTime(),
+            });
+
+            var trackedPath = [];
+
+            // Simulate tracking of the coordinates
+            var currentIndex = [latitude, longitude];
+            var trackedLocationMarker = L.circleMarker(currentIndex).addTo(map);
+            trackedLocationMarker.setLatLng(currentIndex);
+            map.panTo(currentIndex);
+
+            trackedPath.push(currentIndex);
+          },
+
+          (error) => {
+            console.error(error);
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
